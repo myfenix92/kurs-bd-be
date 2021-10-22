@@ -111,6 +111,24 @@ class MainController {
     }
     res.json(getFilterByNameQuery.rows)
   }
+
+  async getAvgCountTables(req, res) {
+    const getAvgQuery = await db.query(`
+    select count(distinct(kurs.user_tables.id_table)) / count(distinct(kurs.users.id_user))::numeric as avg_tab \n
+    from kurs.user_tables, kurs.users`);
+    res.json(getAvgQuery.rows);
+  }
+
+  async getPercentTables(req, res) {
+    const { id_user } = req.body;
+    const getPercentQuery = await db.query(`
+    select (count(distinct(kurs.user_tables.id_table)) * 100) / (select count(kurs.user_tables.id_table) \n
+    from kurs.user_tables) as percent_tab \n
+    from kurs.user_tables, kurs.users \n
+    where kurs.user_tables.id_user = ($1) \n
+    and kurs.user_tables.id_user = kurs.users.id_user`, [id_user]);
+    res.json(getPercentQuery.rows)
+  }
 };
 
 module.exports = new MainController();
