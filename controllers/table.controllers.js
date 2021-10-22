@@ -25,14 +25,14 @@ class TableController {
   }
 
   async deleteRecord(req, res) {
-    const { id_record } = req.params;
+    const { id_record } = req.body;
     const deleteRecordQuery = await db.query(`
     delete from kurs.records where id_record = ($1)`, [id_record]);
     res.json(deleteRecordQuery.rows[0]);
   }
 
   async deleteSticker(req, res) {
-    const { id_sticker } = req.params;
+    const { id_sticker } = req.body;
     const deleteStickerQuery = await db.query(`
     delete from kurs.stickers where id_sticker = ($1)`, [id_sticker]);
     res.json(deleteStickerQuery.rows[0]);
@@ -46,16 +46,14 @@ class TableController {
   }
 
   async createSticker(req, res) {
-    const { id_table } = req.params;
-    const { name_sticker} = req.body;
+    const { id_table, name_sticker } = req.body;
     const createStickerQuery = await db.query(`
     insert into kurs.stickers (id_table, name_sticker, date_create) values ($1, $2, now())`, [id_table, name_sticker]);
     res.json(createStickerQuery.rows[0]);
   }
 
   async createRecord(req, res) {
-    const { id_sticker } = req.params;
-    const { record } = req.body;
+    const { id_sticker, record } = req.body;
     const createRecordQuery = await db.query(`
     insert into kurs.records (id_sticker, record, date_create) values ($1, $2, now())`, [id_sticker, record]);
     res.json(createRecordQuery.rows[0]);
