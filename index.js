@@ -16,6 +16,7 @@
 const express = require('express');
 const userRouter = require('./routes/user.routes');
 const mainRouter = require('./routes/main.routes');
+const tableRouter = require('./routes/table.routes');
 
 const PORT = process.env.PORT || 8080;
 
@@ -24,6 +25,7 @@ const app = express();
 app.use(express.json());
 app.use('/', userRouter);
 app.use('/', mainRouter);
+app.use('/', tableRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
