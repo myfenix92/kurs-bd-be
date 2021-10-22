@@ -5,7 +5,7 @@ class MainController {
   async getAllTables(req, res) {
     const { id_user } = req.body;
     const getTableQuery = await db.query(`
-    select id_table, name_table, date_create, count_records \n
+    select id_table, name_table, date_create, (select kurs.count_record(id_table)) as count_records \n
     from kurs.user_tables, kurs.users \n
     where kurs.users.id_user = kurs.user_tables.id_user \n
     and kurs.users.id_user = ($1) \n
