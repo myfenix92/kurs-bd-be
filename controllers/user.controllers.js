@@ -3,12 +3,20 @@ const md5 = require('md5');
 
 class UserController {
 
-    async aboutUser(req, res) {
-        const { id_user, date_birth, sex } = req.body;
-        const addAboutUser = await db.query(`
-            insert into kurs.about_users (id_user, age, sex, date_registr) 
-            values ($1, (SELECT date_part('year',age(($2)::date))), $3, now())`, [id_user, date_birth, sex])
-        res.json(addAboutUser.rows);
+    async changeAboutUser(req, res) {
+        const { id_user, password, date_birth, sex } = req.body;
+        let addAboutUser;
+        let changePassword;
+        if (req.body.password !== '' && req.body.date_birth !== '' && req.body.sex !== '') {
+            addAboutUser = await db.query(`
+            update kurs.about_users set date_birth = ($1), 
+            sex = ($2)
+            where id_user = ($3)`, [date_birth, sex, id_user]);
+            changePassword = await db.query(`
+            update kurs.users set password = ($1)
+            where id_user = ($2)`, [password, id_user]);
+        }
+        res.json(addAboutUser.rows[0]);
     }
 
     async userCreate(req, res){
@@ -31,8 +39,8 @@ class UserController {
                 id_user: newUserQuery.rows[0].id_user
             });
             const addAboutUser = await db.query(`
-            insert into kurs.about_users (id_user, age, sex, date_registr) 
-            values ($1, (SELECT date_part('year',age(($2)::date))), $3, now())`, [newUserQuery.rows[0].id_user, date_birth, sex])
+            insert into kurs.about_users (id_user, date_birth, sex, date_registr) 
+            values ($1, ($2), $3, now())`, [newUserQuery.rows[0].id_user, date_birth, sex])
         }
     }
 
