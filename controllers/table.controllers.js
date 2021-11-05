@@ -25,14 +25,14 @@ class TableController {
   }
 
   async deleteRecord(req, res) {
-    const { id_record } = req.body;
+    const { id_record } = req.params;
     const deleteRecordQuery = await db.query(`
     delete from kurs.records where id_record = ($1)`, [id_record]);
     res.json(deleteRecordQuery.rows[0]);
   }
 
   async deleteSticker(req, res) {
-    const { id_sticker } = req.body;
+    const { id_sticker } = req.params;
     const deleteStickerQuery = await db.query(`
     delete from kurs.stickers where id_sticker = ($1)`, [id_sticker]);
     res.json(deleteStickerQuery.rows[0]);
@@ -89,18 +89,17 @@ class TableController {
   }
 
   async sortByAlphabet(req, res) {
-    const { id_sticker } = req.body
+    const { id_sticker } = req.params
     const sortByAlphabetQuery = await db.query(`
     select record from kurs.records, kurs.stickers \n
     where kurs.records.id_sticker = kurs.stickers.id_sticker \n
-    and kurs.records.id_record = kurs.history_changes.id_record \n
     and kurs.stickers.id_sticker = ($1) \n
     order by record`, [id_sticker]);
     res.json(sortByAlphabetQuery.rows);
   }
 
   async sortByOld(req, res) {
-    const { id_sticker } = req.body
+    const { id_sticker } = req.params
     const sortByAlphabetQuery = await db.query(`
     select record from kurs.records, kurs.stickers, kurs.history_changes \n
     where kurs.records.id_sticker = kurs.stickers.id_sticker \n
@@ -111,13 +110,13 @@ class TableController {
   }
 
   async sortByNew(req, res) {
-    const { id_sticker } = req.body
+    const { id_sticker } = req.params
     const sortByAlphabetQuery = await db.query(`
-    select record from kurs.records, kurs.stickers \n
+    select record from kurs.records, kurs.stickers, kurs.history_changes \n
     where kurs.records.id_sticker = kurs.stickers.id_sticker \n
     and kurs.records.id_record = kurs.history_changes.id_record \n
     and kurs.stickers.id_sticker = ($1) \n
-    order by kurs.records.date_create desc`, [id_sticker]);
+    order by kurs.history_changes.date_change desc`, [id_sticker]);
     res.json(sortByAlphabetQuery.rows)
   }
 };
