@@ -3,13 +3,13 @@ const router = new Routr();
 const TableController = require('../controllers/table.controllers');
 
 router.get('/table/sticker', TableController.getStickersValue);
-router.get('/table/sort/alphabet', TableController.sortByAlphabet);
-router.get('/table/sort/old', TableController.sortByOld);
-router.get('/table/sort/new', TableController.sortByNew);
+router.get('/table/sort/alphabet/:id_sticker', TableController.sortByAlphabet);
+router.get('/table/sort/old/:id_sticker', TableController.sortByOld);
+router.get('/table/sort/new/:id_sticker', TableController.sortByNew);
 router.get('/table/:id_table', TableController.getTable);
 
-router.delete('/table/record', TableController.deleteRecord);
-router.delete('/table/sticker', TableController.deleteSticker);
+router.delete('/table/record/:id_record', TableController.deleteRecord);
+router.delete('/table/sticker/:id_sticker', TableController.deleteSticker);
 router.delete('/table/:id_table', TableController.deleteTable);
 
 router.post('/table/sticker', TableController.createSticker);
