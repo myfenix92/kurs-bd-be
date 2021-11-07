@@ -1,5 +1,6 @@
 const db = require('../db');
 const md5 = require('md5');
+const bcrypt = require('bcrypt');
 
 class UserController {
 
@@ -46,8 +47,9 @@ class UserController {
                 regText: 'User alredy exist',
             });
         } else {
+            const hashPassword = bcrypt.hashSync(String(password), 7)
             const newUserQuery = await db.query(
-                `INSERT INTO kurs.users VALUES ($1, $2) RETURNING *`, [login, password]);
+                `INSERT INTO kurs.users VALUES ($1, $2) RETURNING *`, [login, hashPassword]);
             res.json({
                 regStatus: 1,
                 regText: 'Registered',
@@ -74,9 +76,8 @@ class UserController {
         } else {
             const passwordRequest = await db.query(`
                 SELECT id_user, password from kurs.users WHERE login = ($1);`, [login]);
-            const tabPassword = +passwordRequest.rows[0].password;
-            const userExist = password === tabPassword ? true : false;
-            if (!userExist) {
+            const validPassword  = (password, passwordRequest.rows[0].password)
+            if (!validPassword) {
                 res.json({
                     loginStatus: 0,
                     loginMessage: 'Wrong password'
