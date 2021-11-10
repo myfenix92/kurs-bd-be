@@ -5,22 +5,26 @@ class TableController {
   async getTable(req, res) {
     const { id_table }  = req.params;
     const getTableQuery = await db.query(`
-    select kurs.stickers.id_sticker, name_sticker, kurs.history_changes.date_create \n
-    from kurs.user_tables, kurs.stickers \n
+    select kurs.stickers.id_sticker, name_sticker, date_change::timestamp at time zone 'Etc/Greenwich' as date_change, time_change \n
+    from kurs.user_tables, kurs.stickers, kurs.history_changes \n
     where kurs.user_tables.id_table = kurs.stickers.id_table \n
+    and kurs.user_tables.id_table = kurs.history_changes.id_table \n
+	  and kurs.stickers.id_sticker = kurs.history_changes.id_sticker \n
     and kurs.user_tables.id_table = ($1) \n
-    order by kurs.history_changes.date_create desc`, [id_table]);
+    order by id_sticker desc`, [id_table]);
     res.json(getTableQuery.rows);
   }
 
   async getStickersValue(req, res) {
-    const { id_sticker } = req.body;
+    const { id_sticker } = req.params;
     const getStickerValueQuery = await db.query(`
-    select kurs.stickers.id_sticker, id_record, record, kurs.history_changes.date_create \n
-    from kurs.stickers, kurs.records \n
+    select kurs.stickers.id_sticker, kurs.records.id_record, record, date_change::timestamp at time zone 'Etc/Greenwich' as date_change, time_change, done  \n
+    from kurs.stickers, kurs.records, kurs.history_changes \n
     where kurs.stickers.id_sticker = kurs.records.id_sticker \n
+    and kurs.stickers.id_sticker = kurs.history_changes.id_sticker \n
+    and kurs.records.id_record = kurs.history_changes.id_record \n
     and kurs.stickers.id_sticker = ($1) \n
-    order by kurs.history_changes.date_create desc`, [id_sticker]);
+    order by id_record`, [id_sticker]);
     res.json(getStickerValueQuery.rows)
   }
 
@@ -60,11 +64,11 @@ class TableController {
   }
   
   async changeNameTable(req, res) {
-    const { id_table } = req.params;
-    const { new_name_table } = req.body;
+    //const { id_table } = req.params;
+    const { id_table, new_name_table } = req.body;
     try {
       const changeTableNameQuery = await db.query(`
-      update kurs.user_tables set name_table = ($1) where id_table = ($2) returning *`, [new_name_table, id_table]);
+      update kurs.user_tables set name_table = ($1) where id_table = ($2)  returning *`, [new_name_table, id_table]);
       res.json(changeTableNameQuery.rows[0]);
     } catch(error) {
       res.json({
@@ -118,6 +122,13 @@ class TableController {
     and kurs.stickers.id_sticker = ($1) \n
     order by kurs.history_changes.date_change desc`, [id_sticker]);
     res.json(sortByAlphabetQuery.rows)
+  }
+
+  async isDone(req, res) {
+    const { id_record } = req.body;
+    const isDoneQuery = await db.query(`
+    update kurs.records set done = not done where id_record = ($1)`, [id_record]);
+    res.json(isDoneQuery.rows)
   }
 };
 
