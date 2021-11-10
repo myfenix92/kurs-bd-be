@@ -1,7 +1,14 @@
 const db = require('../db');
-const md5 = require('md5');
+const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
+const {secret} = require('../config')
 
+const generateAccessToken = (login) => {
+    const payload = {
+        login
+    }
+    return jwt.sign(payload, secret, {expiresIn: '24h'})
+}
 class UserController {
 
     async changeAboutUser(req, res) {
@@ -76,7 +83,8 @@ class UserController {
         } else {
             const passwordRequest = await db.query(`
                 SELECT id_user, password from kurs.users WHERE login = ($1);`, [login]);
-            const validPassword  = (password, passwordRequest.rows[0].password)
+            const validPassword  = bcrypt.compareSync(String(password), passwordRequest.rows[0].password);
+            const token = generateAccessToken(login)
             if (!validPassword) {
                 res.json({
                     loginStatus: 0,
@@ -86,7 +94,7 @@ class UserController {
                 res.json({
                     loginStatus: 1,
                     loginMessage: 'Login success',
-                    loginToken: md5(Date.now()),
+                    loginToken: token,
                     id_user: passwordRequest.rows[0].id_user
                 })
             }
