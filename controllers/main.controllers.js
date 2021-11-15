@@ -130,6 +130,14 @@ class MainController {
     and kurs.user_tables.id_user = kurs.users.id_user`, [id_user]);
     res.json(getNumericQuery.rows)
   }
+
+  async getAllDaysUser(req, res) {
+    const { id_user } = req.params;
+    const getAllDaysQuery = await db.query(`
+    select extract('day' from date_trunc('day',now() - date_registr)) as all_days \n 
+    from kurs.about_users where id_user = ($1);`, [id_user]);
+    res.json(getAllDaysQuery.rows[0]);
+  }
 };
 
 module.exports = new MainController();
