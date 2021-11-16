@@ -7,7 +7,7 @@ const generateAccessToken = (login) => {
     const payload = {
         login
     }
-    return jwt.sign(payload, secret, {expiresIn: '24h'})
+    return jwt.sign(payload, secret, {expiresIn: '7d'})
 }
 class UserController {
 
@@ -107,7 +107,8 @@ class UserController {
     async getAboutUser(req, res) {
         const { id_user } = req.params;
         const aboutUser = await db.query(`
-        select date_birth::timestamp at time zone 'Etc/Greenwich' as date_birth, sex, login from kurs.about_users, kurs.users where kurs.about_users.id_user = ($1) \n
+        select date_birth::timestamp at time zone 'Etc/Greenwich' as date_birth, sex, login, extract('day' from date_trunc('day',now() - date_registr)) as all_days \n 
+        from kurs.about_users, kurs.users where kurs.about_users.id_user = ($1) \n
         and kurs.about_users.id_user = kurs.users.id_user`, [id_user]);
         res.json(aboutUser.rows[0])
     }
