@@ -1,6 +1,7 @@
 const Routr = require('express');
 const router = new Routr();
 const TableController = require('../controllers/table.controllers');
+const authMiddleware = require('../middlewaree/authMiddleware')
 
 router.get('/table/sticker/:id_sticker', TableController.getStickersValue);
 router.get('/table/sort/alphabet/:id_sticker', TableController.sortByAlphabet);
