@@ -149,7 +149,7 @@ class MainController {
     const { id_user } = req.params;
     const getNumericQuery = await db.query(`
     select (count(distinct(kurs.user_tables.id_table)) * 100) / (select count(kurs.user_tables.id_table) \n
-    from kurs.user_tables) as percent_tab, \n
+    from kurs.user_tables)::numeric as percent_tab, \n
     (select count(distinct(kurs.user_tables.id_table)) / count(distinct(kurs.users.id_user))::numeric \n
     from kurs.user_tables, kurs.users) as avg_tab \n
     from kurs.user_tables, kurs.users \n
