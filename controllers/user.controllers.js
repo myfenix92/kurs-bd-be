@@ -20,14 +20,15 @@ class UserController {
         } = req.body;
         let addAboutUser;
         let changePassword;
+        const hashPassword = bcrypt.hashSync(String(password), 7)
         if (req.body.password !== '' && req.body.date_birth !== '' && req.body.sex !== '') {
             addAboutUser = await db.query(`
             update kurs.about_users set date_birth = ($1)::timestamp at time zone 'Europe/Moscow', 
             sex = ($2)
-            where id_user = ($3)`, [date_birth, sex, id_user]);
+            where id_user = ($3);`, [date_birth, sex, id_user]);
             changePassword = await db.query(`
             update kurs.users set password = ($1)
-            where id_user = ($2)`, [password, id_user]);
+            where id_user = ($2);`, [hashPassword, id_user]);
         } else
         if (req.body.password === '' && req.body.date_birth !== '' && req.body.sex !== '') {
             addAboutUser = await db.query(`
@@ -107,9 +108,11 @@ class UserController {
     async getAboutUser(req, res) {
         const { id_user } = req.params;
         const aboutUser = await db.query(`
-        select date_birth::timestamp at time zone 'Etc/Greenwich' as date_birth, sex, login, extract('day' from date_trunc('day',now() - date_registr)) as all_days \n 
+        select date_birth::timestamp at time zone 'Etc/Greenwich' as date_birth, sex, login, extract('day' from date_trunc('day',now() - date_registr)) as all_days, \n 
+        (select count(kurs.users.id_user) from kurs.users) as all_users, (select count(id_user) from kurs.users where online = true) as online \n
         from kurs.about_users, kurs.users where kurs.about_users.id_user = ($1) \n
-        and kurs.about_users.id_user = kurs.users.id_user`, [id_user]);
+        and kurs.about_users.id_user = kurs.users.id_user
+        group by date_birth, sex, login, date_registr;`, [id_user]);
         res.json(aboutUser.rows[0])
     }
 
@@ -123,14 +126,15 @@ class UserController {
         res.json(setNewPassQuery.rows[0]);
     }
 
-    async deleteUser(req, res) {
+    async userLogout(req, res) {
         const {
             id_user
         } = req.body;
-        const userDeleteQuery = await db.query(`
-            DELETE FROM kurs.users WHERE id_user = ($1)`, [id_user]);
-        res.json(userDeleteQuery.rows[0]);
+        const setNewPassQuery = await db.query(
+            `UPDATE kurs.users SET online = false WHERE id_user = ($1)`, [id_user]);
+        res.json(setNewPassQuery.rows[0]);
     }
+
 }
 
 module.exports = new UserController();
