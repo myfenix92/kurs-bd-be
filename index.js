@@ -1,18 +1,3 @@
-// var bcrypt = require('bcrypt');
- 
-// // пароль пользователя
-// var passwordFromUser = "1234";
- 
-// // создаем соль
-// var salt = bcrypt.genSaltSync(10);
- 
-// // шифруем пароль
-// var passwordToSave = bcrypt.hashSync(passwordFromUser, salt)
- 
-// // выводим результат
-// console.log(salt);
-// console.log(passwordFromUser);
-// console.log(passwordToSave);
 const express = require('express');
 const userRouter = require('./routes/user.routes');
 const mainRouter = require('./routes/main.routes');
