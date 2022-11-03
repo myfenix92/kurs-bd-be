@@ -3,9 +3,11 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const {secret} = require('../config')
 
-const generateAccessToken = (login) => {
+const generateAccessToken = (id_user, login, role) => {
     const payload = {
-        login
+        id_user,
+        login,
+        role,
     }
     return jwt.sign(payload, secret, {expiresIn: '7d'})
 }
@@ -55,7 +57,7 @@ class UserController {
                 regText: 'User alredy exist',
             });
         } else {
-            const hashPassword = bcrypt.hashSync(String(password), 7)
+            const hashPassword = bcrypt.hashSync(String(password), 7);
             const newUserQuery = await db.query(
                 `INSERT INTO kurs.users VALUES ($1, $2) RETURNING *`, [login, hashPassword]);
             res.json({
@@ -83,9 +85,9 @@ class UserController {
             })
         } else {
             const passwordRequest = await db.query(`
-                SELECT id_user, password from kurs.users WHERE login = ($1);`, [login]);
+                SELECT id_user, password, role from kurs.users WHERE login = ($1);`, [login]);
             const validPassword  = bcrypt.compareSync(String(password), passwordRequest.rows[0].password);
-            const token = generateAccessToken(login)
+            const token = generateAccessToken(passwordRequest.rows[0].id_user, login, passwordRequest.rows[0].role)
             if (!validPassword) {
                 res.json({
                     loginStatus: 0,
@@ -103,6 +105,20 @@ class UserController {
             UPDATE kurs.users SET online = true WHERE id_user = ($1)`, [passwordRequest.rows[0].id_user]);
         }
 
+    }
+
+    async getUsers(req, res) {
+        try {
+            const users = await db.query(`select kurs.users.id_user, login, sex, date_birth, date_registr, COALESCE(count(id_table), 0) as count_tables
+            from kurs.about_users, kurs.users
+            left join kurs.user_tables on kurs.user_tables.id_user = kurs.users.id_user
+            where kurs.users.id_user = kurs.about_users.id_user and kurs.users.id_user <> 1
+            group by kurs.users.id_user, login, sex, date_birth, date_registr
+            order by kurs.users.id_user`)
+            res.json(users)
+        } catch (e) {
+            console.log(e)
+        }
     }
 
     async getAboutUser(req, res) {
@@ -130,9 +146,9 @@ class UserController {
         const {
             id_user
         } = req.body;
-        const setNewPassQuery = await db.query(
+        const setOnline = await db.query(
             `UPDATE kurs.users SET online = false WHERE id_user = ($1)`, [id_user]);
-        res.json(setNewPassQuery.rows[0]);
+        res.json(setOnline.rows[0]);
     }
 
 }

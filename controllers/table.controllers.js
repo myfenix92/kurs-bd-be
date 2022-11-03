@@ -99,8 +99,7 @@ class TableController {
     where kurs.records.id_sticker = kurs.stickers.id_sticker \n
     and kurs.records.id_record = kurs.history_changes.id_record \n
     and kurs.stickers.id_sticker = ($1) \n
-		order by kurs.history_changes.id_record) as time_ch \n
-    order by time_ch.time_change`, [id_sticker]);
+		order by kurs.history_changes.id_record desc) as time_ch`, [id_sticker]);
     res.json(sortByAlphabetQuery.rows)
   }
 
@@ -112,8 +111,7 @@ class TableController {
     where kurs.records.id_sticker = kurs.stickers.id_sticker \n
     and kurs.records.id_record = kurs.history_changes.id_record \n
     and kurs.stickers.id_sticker = ($1) \n
-		order by kurs.history_changes.id_record) as time_ch \n
-    order by time_ch.time_change desc`, [id_sticker]);
+		order by kurs.history_changes.id_record) as time_ch`, [id_sticker]);
     res.json(sortByAlphabetQuery.rows)
   }
 
