@@ -121,13 +121,42 @@ class UserController {
         }
     }
 
+    async getCountUsers(req, res) {
+        try {
+            const countUsers = await db.query(`select count(kurs.users.id_user) - 1 as all_users, 
+            (select count(id_user) - 1 from kurs.users where online = true) as online \n
+            from kurs.users;`)
+            res.json(countUsers);
+        }
+        catch(e) {
+            console.log(e)
+        }
+    }
+
+    async getMessagesFromAdmin(req, res) {
+
+    }
+
+    async getMessagesFromUser(req, res) {
+        try {
+            const msgFromUsers = await db.query(`select id_user, count(id) as count_msg from kurs.support
+            where type_msg = 1 and read_msg = false
+            group by id_user
+            order by id_user`);
+            res.json(msgFromUsers);
+        }
+
+        catch(e) {
+            console.log(e)
+        }
+    }
+
     async getAboutUser(req, res) {
         const { id_user } = req.params;
         const aboutUser = await db.query(`
-        select date_birth::timestamp at time zone 'Etc/Greenwich' as date_birth, sex, login, extract('day' from date_trunc('day',now() - date_registr)) as all_days, \n 
-        (select count(kurs.users.id_user) from kurs.users) as all_users, (select count(id_user) from kurs.users where online = true) as online \n
+        select date_birth::timestamp at time zone 'Etc/Greenwich' as date_birth, sex, login, extract('day' from date_trunc('day',now() - date_registr)) as all_days\n 
         from kurs.about_users, kurs.users where kurs.about_users.id_user = ($1) \n
-        and kurs.about_users.id_user = kurs.users.id_user
+        and kurs.about_users.id_user = kurs.users.id_user \n
         group by date_birth, sex, login, date_registr;`, [id_user]);
         res.json(aboutUser.rows[0])
     }
