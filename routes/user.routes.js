@@ -8,7 +8,8 @@ router.post('/register', userController.userCreate);
 router.post('/login', userController.userLogin);
 
 router.get('/user/:id_user', authMiddleware, userController.getAboutUser);
-router.get('/users', roleMiddleware([1]), userController.getUsers)
+router.get('/users', roleMiddleware([1]), userController.getUsers);
+router.get('/user_msg', roleMiddleware([1, 2]), userController.getMessages);
 
 router.put('/profile', userController.changeAboutUser);
 router.put('/logout', userController.userLogout);
