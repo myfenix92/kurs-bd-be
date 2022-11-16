@@ -5,7 +5,7 @@ class MainController {
   async getAllTables(req, res) {
     const { id_user } = req.params;
     const getTableQuery = await db.query(`
-    select kurs.user_tables.id_table, name_table, date_change::timestamp at time zone 'Etc/Greenwich' as date_create, \n
+    select kurs.user_tables.id_table, name_table, date_change::timestamp at time zone 'Etc/Greenwich' as date_create, bg_image, \n
     (select kurs.count_record(kurs.user_tables.id_table)) as count_records \n
     from kurs.users, kurs.user_tables \n
     join kurs.history_changes on kurs.history_changes.id_table = kurs.user_tables.id_table \n
