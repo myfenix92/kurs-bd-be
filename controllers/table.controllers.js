@@ -13,6 +13,13 @@ class TableController {
     res.json(getTableQuery.rows);
   }
 
+  async getBgTable(req, res) {
+    const { id_table }  = req.params;
+    const getBgTableQuery = await db.query(`
+    select bg_image from kurs.user_tables where id_table = ($1)`, [id_table]);
+    res.json(getBgTableQuery.rows[0]);
+  }
+
   async getStickersValue(req, res) {
     const { id_sticker } = req.params;
     const getStickerValueQuery = await db.query(`
@@ -58,6 +65,20 @@ class TableController {
     try {
       const changeTableNameQuery = await db.query(`
       update kurs.user_tables set name_table = ($1) where id_table = ($2)  returning *`, [new_name_table, id_table]);
+      res.json(changeTableNameQuery.rows[0]);
+    } catch(error) {
+      res.json({
+        code: error.code,
+        message: error.message
+      })
+    }
+  }
+
+  async changeBgTable(req, res) {
+    const { id_table, new_bg } = req.body;
+    try {
+      const changeTableNameQuery = await db.query(`
+      update kurs.user_tables set bg_image = ($1) where id_table = ($2)  returning *`, [new_bg, id_table]);
       res.json(changeTableNameQuery.rows[0]);
     } catch(error) {
       res.json({
