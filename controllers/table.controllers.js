@@ -9,7 +9,7 @@ class TableController {
     from kurs.user_tables, kurs.stickers \n
     where kurs.user_tables.id_table = kurs.stickers.id_table \n
     and kurs.user_tables.id_table = ($1) \n
-    order by id_sticker desc`, [id_table]);
+    order by id_sticker`, [id_table]);
     res.json(getTableQuery.rows);
   }
 
