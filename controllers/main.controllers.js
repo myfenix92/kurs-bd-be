@@ -39,7 +39,7 @@ class MainController {
     if (nameTable !== '' && dateFrom === '' && dateTo === '') {
       queryString = `
       select kurs.user_tables.id_table, name_table, date_change::timestamp at time zone 'Etc/Greenwich' as date_create, \n
-      (select kurs.count_record(kurs.user_tables.id_table)) as count_records \n
+      (select kurs.count_record(kurs.user_tables.id_table)) as count_records, bg_image \n
       from kurs.users, kurs.user_tables \n
       join kurs.history_changes on kurs.history_changes.id_table = kurs.user_tables.id_table \n
       where kurs.history_changes.changes = 'создали доску' \n
@@ -52,7 +52,7 @@ class MainController {
     } else if (nameTable !== '' && dateFrom !== '' && dateTo === '') {
       queryString = `
       select kurs.user_tables.id_table, name_table, date_change::timestamp at time zone 'Etc/Greenwich' as date_create, \n
-      (select kurs.count_record(kurs.user_tables.id_table)) as count_records \n
+      (select kurs.count_record(kurs.user_tables.id_table)) as count_records, bg_image \n
       from kurs.users, kurs.user_tables \n
       join kurs.history_changes on kurs.history_changes.id_table = kurs.user_tables.id_table \n
       where kurs.history_changes.changes = 'создали доску' \n
@@ -66,7 +66,7 @@ class MainController {
     } else if (nameTable !== '' && dateFrom !== '' && dateTo !== '') {
       queryString = `
       select kurs.user_tables.id_table, name_table, date_change::timestamp at time zone 'Etc/Greenwich' as date_create, \n
-      (select kurs.count_record(kurs.user_tables.id_table)) as count_records \n
+      (select kurs.count_record(kurs.user_tables.id_table)) as count_records, bg_image \n
       from kurs.users, kurs.user_tables \n
       join kurs.history_changes on kurs.history_changes.id_table = kurs.user_tables.id_table \n
       where kurs.history_changes.changes = 'создали доску' \n
@@ -80,7 +80,7 @@ class MainController {
     } else if (nameTable !== '' && dateFrom === '' && dateTo !== '') {
       queryString = `
       select kurs.user_tables.id_table, name_table, date_change::timestamp at time zone 'Etc/Greenwich' as date_create, \n
-      (select kurs.count_record(kurs.user_tables.id_table)) as count_records \n
+      (select kurs.count_record(kurs.user_tables.id_table)) as count_records, bg_image \n
       from kurs.users, kurs.user_tables \n
       join kurs.history_changes on kurs.history_changes.id_table = kurs.user_tables.id_table \n
       where kurs.history_changes.changes = 'создали доску' \n
@@ -94,7 +94,7 @@ class MainController {
     } else if (nameTable === '' && dateFrom !== '' && dateTo === '') {
       queryString = `
       select kurs.user_tables.id_table, name_table, date_change::timestamp at time zone 'Etc/Greenwich' as date_create, \n
-      (select kurs.count_record(kurs.user_tables.id_table)) as count_records \n
+      (select kurs.count_record(kurs.user_tables.id_table)) as count_records, bg_image \n
       from kurs.users, kurs.user_tables \n
       join kurs.history_changes on kurs.history_changes.id_table = kurs.user_tables.id_table \n
       where kurs.history_changes.changes = 'создали доску' \n
@@ -107,7 +107,7 @@ class MainController {
     } else if (nameTable === '' && dateFrom === '' && dateTo !== '') {
       queryString = `
       select kurs.user_tables.id_table, name_table, date_change::timestamp at time zone 'Etc/Greenwich' as date_create, \n
-      (select kurs.count_record(kurs.user_tables.id_table)) as count_records \n
+      (select kurs.count_record(kurs.user_tables.id_table)) as count_records, bg_image \n
       from kurs.users, kurs.user_tables \n
       join kurs.history_changes on kurs.history_changes.id_table = kurs.user_tables.id_table \n
       where kurs.history_changes.changes = 'создали доску' \n
@@ -120,7 +120,7 @@ class MainController {
     } else if (nameTable === '' && dateFrom !== '' && dateTo !== '') {
       queryString = `
       select kurs.user_tables.id_table, name_table, date_change::timestamp at time zone 'Etc/Greenwich' as date_create, \n
-      (select kurs.count_record(kurs.user_tables.id_table)) as count_records \n
+      (select kurs.count_record(kurs.user_tables.id_table)) as count_records, bg_image \n
       from kurs.users, kurs.user_tables \n
       join kurs.history_changes on kurs.history_changes.id_table = kurs.user_tables.id_table \n
       where kurs.history_changes.changes = 'создали доску' \n
@@ -133,7 +133,7 @@ class MainController {
     } else if (nameTable === '' && dateFrom === '' && dateTo === '') {
       queryString = `
       select kurs.user_tables.id_table, name_table, date_change::timestamp at time zone 'Etc/Greenwich' as date_create, \n
-      (select kurs.count_record(kurs.user_tables.id_table)) as count_records \n
+      (select kurs.count_record(kurs.user_tables.id_table)) as count_records, bg_image \n
       from kurs.users, kurs.user_tables \n
       join kurs.history_changes on kurs.history_changes.id_table = kurs.user_tables.id_table \n
       where kurs.history_changes.changes = 'создали доску' \n

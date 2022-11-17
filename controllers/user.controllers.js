@@ -154,9 +154,17 @@ class UserController {
         const {
             id_user
         } = req.params;
-        const dialogData = await db.query(`select date_sent, message, type_msg from kurs.support where id_user = ($1)
-        order by id;`, [id_user]);
-        res.json(dialogData);
+        if (Number(id_user)) {
+            const dialogData = await db.query(`select date_sent, message, type_msg from kurs.support where id_user = ($1)
+            order by id;`, [id_user]);
+            res.json(dialogData);
+        } else {
+            const tokenId = jwt.decode(id_user).id_user;
+            const dialogData = await db.query(`select date_sent, message, type_msg from kurs.support where id_user = ($1)
+            order by id;`, [tokenId]);
+            res.json(dialogData);
+        }
+
     }
 
     async getAboutUser(req, res) {
