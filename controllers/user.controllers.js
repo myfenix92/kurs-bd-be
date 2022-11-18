@@ -216,6 +216,27 @@ class UserController {
         res.json(setOnline.rows[0]);
     }
 
+    async insertMsg(req, res) {
+        try {
+          const { id_user, message } = req.body;
+          if (Number(id_user)) {
+            const newMsg = await db.query(`
+          insert into kurs.support (id_user, date_sent, message, type_msg) values ($1, now(), $2, 0)`, [id_user, message]);
+          res.json(newMsg.rows)
+        } else {
+            const tokenId = jwt.decode(id_user).id_user;
+            const newMsg = await db.query(`
+          insert into kurs.support (id_user, date_sent, message, type_msg) values ($1, now(), $2, 1)`, [tokenId, message]);
+          res.json(newMsg.rows)
+        }
+        } catch(error) {
+          res.json({
+            errorMessage: error.message,
+          })
+        }
+    
+      }
+
 }
 
 module.exports = new UserController();

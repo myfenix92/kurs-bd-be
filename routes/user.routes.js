@@ -6,6 +6,7 @@ const roleMiddleware = require('../middlewaree/roleMiddleware')
 
 router.post('/register', userController.userCreate);
 router.post('/login', userController.userLogin);
+router.post('/dialog', userController.insertMsg);
 
 router.get('/user/:id_user', authMiddleware, userController.getAboutUser);
 
