@@ -155,12 +155,12 @@ class UserController {
             id_user
         } = req.params;
         if (Number(id_user)) {
-            const dialogData = await db.query(`select date_sent, message, type_msg from kurs.support where id_user = ($1)
+            const dialogData = await db.query(`select date_sent::timestamp at time zone 'Etc/Greenwich' as date_sent, message, type_msg from kurs.support where id_user = ($1)
             order by id;`, [id_user]);
             res.json(dialogData);
         } else {
             const tokenId = jwt.decode(id_user).id_user;
-            const dialogData = await db.query(`select date_sent, message, type_msg from kurs.support where id_user = ($1)
+            const dialogData = await db.query(`select date_sent::timestamp at time zone 'Etc/Greenwich' as date_sent, message, type_msg from kurs.support where id_user = ($1)
             order by id;`, [tokenId]);
             res.json(dialogData);
         }
