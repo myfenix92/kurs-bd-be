@@ -42,10 +42,37 @@ app.use(function(err, req, res, next) {
   });
 });
 
+const isValidJwt = (header) => {
+  const token = header.split(' ')[1];
+  if (token) {
+    return true;
+  } else {
+    return false;
+  }
+};
+
+io.use((socket, next) => {
+  const header = socket.handshake.headers['authorization'];
+  if (isValidJwt(header)) {
+    return next();
+  }
+  return next(new Error('authentication error'));
+});
+
 io.on('connection', (socket) => {
-  socket.on('chat message',  (msg, send) => {
-    io.emit('chat message',  msg, send);
-  //  console.log(msg)
+  socket.on('room', room => {
+    socket.join(room);
+  })
+
+  socket.on('chat message',  (msg, send, id_user) => {
+
+     if (send === 1 ) {
+      io.to(`${id_user}`).emit('chat message',  msg, send, id_user);
+    } else {
+      socket.join(id_user);
+      io.to(`${id_user}`).emit('chat message',  msg, send, id_user);
+    }
+    
   });
 });
 
