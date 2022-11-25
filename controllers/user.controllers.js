@@ -142,6 +142,7 @@ class UserController {
             const msgFromUsers = await db.query(`select kurs.users.id_user, coalesce(count(kurs.support.id_user), 0) as count_msg
             from kurs.users
             left join kurs.support on kurs.support.id_user = kurs.users.id_user and type_msg = 1 and read_msg = false
+            where kurs.users.id_user <> 1
 			group by kurs.users.id_user
 			order by kurs.users.id_user`);
             res.json(msgFromUsers);
