@@ -18,6 +18,7 @@ router.post('/table/sticker', TableController.createSticker);
 router.post('/table/record', TableController.createRecord);
 
 router.put('/table/change/record', TableController.changeRecord);
+router.put('/table/move/record', TableController.moveRecord);
 router.put('/table/change/sticker', TableController.changeNameSticker);
 router.put('/table/:id_table', TableController.changeNameTable);
 router.put('/table/bg/:id_table', TableController.changeBgTable);
