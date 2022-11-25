@@ -23,11 +23,11 @@ class TableController {
   async getStickersValue(req, res) {
     const { id_sticker } = req.params;
     const getStickerValueQuery = await db.query(`
-    select kurs.stickers.id_sticker, kurs.records.id_record, record, done  \n
+    select kurs.stickers.id_sticker, kurs.records.id_record, record, done, date_create  \n
     from kurs.stickers, kurs.records \n
     where kurs.stickers.id_sticker = kurs.records.id_sticker \n
     and kurs.stickers.id_sticker = ($1) \n
-    order by id_record`, [id_sticker]);
+    order by date_create`, [id_sticker]);
     res.json(getStickerValueQuery.rows)
   }
 
@@ -102,6 +102,14 @@ class TableController {
     res.json(changeRecordQuery.rows[0]);
   }
 
+  //стикер
+  async moveRecord(req, res) {
+    const { id_sticker, id_record } = req.body;
+    const changeRecordQuery = await db.query(`
+    update kurs.records set id_sticker = ($1) where id_record = ($2) returning *`, [id_sticker, id_record]);
+    res.json(changeRecordQuery.rows[0]);
+  }
+
   async sortByAlphabet(req, res) {
     const { id_sticker } = req.params
     const sortByAlphabetQuery = await db.query(`
@@ -115,24 +123,22 @@ class TableController {
   async sortByOld(req, res) {
     const { id_sticker } = req.params
     const sortByAlphabetQuery = await db.query(`
-    select * from (select distinct on (kurs.history_changes.id_record) time_change, record, done \n
-		from kurs.records, kurs.stickers, kurs.history_changes \n
-    where kurs.records.id_sticker = kurs.stickers.id_sticker \n
-    and kurs.records.id_record = kurs.history_changes.id_record \n
+    select kurs.stickers.id_sticker, kurs.records.id_record, record, done, date_create  \n
+    from kurs.stickers, kurs.records \n
+    where kurs.stickers.id_sticker = kurs.records.id_sticker \n
     and kurs.stickers.id_sticker = ($1) \n
-		order by kurs.history_changes.id_record desc) as time_ch`, [id_sticker]);
+    order by date_create desc`, [id_sticker]);
     res.json(sortByAlphabetQuery.rows)
   }
 
   async sortByNew(req, res) {
     const { id_sticker } = req.params
     const sortByAlphabetQuery = await db.query(`
-    select * from (select distinct on (kurs.history_changes.id_record) time_change, record, done \n
-		from kurs.records, kurs.stickers, kurs.history_changes \n
-    where kurs.records.id_sticker = kurs.stickers.id_sticker \n
-    and kurs.records.id_record = kurs.history_changes.id_record \n
+    select kurs.stickers.id_sticker, kurs.records.id_record, record, done, date_create  \n
+    from kurs.stickers, kurs.records \n
+    where kurs.stickers.id_sticker = kurs.records.id_sticker \n
     and kurs.stickers.id_sticker = ($1) \n
-		order by kurs.history_changes.id_record) as time_ch`, [id_sticker]);
+    order by date_create asc`, [id_sticker]);
     res.json(sortByAlphabetQuery.rows)
   }
 
