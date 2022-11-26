@@ -8,7 +8,7 @@ router.post('/register', userController.userCreate);
 router.post('/login', userController.userLogin);
 router.post('/dialog', userController.insertMsg);
 
-router.get('/user/:id_user', authMiddleware, userController.getAboutUser);
+router.get('/user/:id_user', roleMiddleware([1, 2]), userController.getAboutUser);
 
 router.get('/users', roleMiddleware([1]), userController.getUsers);
 router.get('/count_users', roleMiddleware([1]), userController.getCountUsers);

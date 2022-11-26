@@ -7,118 +7,138 @@ const generateAccessToken = (id_user, login, role) => {
     const payload = {
         id_user,
         login,
-        role,
+        role
     }
     return jwt.sign(payload, secret, {expiresIn: '7d'})
 }
 class UserController {
 
     async changeAboutUser(req, res) {
-        const {
-            id_user,
-            password,
-            date_birth,
-            sex
-        } = req.body;
+        const {id_user, password, date_birth, sex} = req.body;
         let addAboutUser;
         let changePassword;
         const hashPassword = bcrypt.hashSync(String(password), 7)
         if (req.body.password !== '' && req.body.date_birth !== '' && req.body.sex !== '') {
-            addAboutUser = await db.query(`
+            addAboutUser = await db.query(
+                `
             update kurs.about_users set date_birth = ($1)::timestamp at time zone 'Europe/Moscow', 
             sex = ($2)
-            where id_user = ($3);`, [date_birth, sex, id_user]);
-            changePassword = await db.query(`
+            where id_user = ($3);`,
+                [date_birth, sex, id_user]
+            );
+            changePassword = await db.query(
+                `
             update kurs.users set password = ($1)
-            where id_user = ($2);`, [hashPassword, id_user]);
-        } else
-        if (req.body.password === '' && req.body.date_birth !== '' && req.body.sex !== '') {
-            addAboutUser = await db.query(`
+            where id_user = ($2);`,
+                [hashPassword, id_user]
+            );
+        } else if (req.body.password === '' && req.body.date_birth !== '' && req.body.sex !== '') {
+            addAboutUser = await db.query(
+                `
             update kurs.about_users set date_birth = ($1)::timestamp at time zone 'Europe/Moscow', 
             sex = ($2)
-            where id_user = ($3)`, [date_birth, sex, id_user]);
+            where id_user = ($3)`,
+                [date_birth, sex, id_user]
+            );
         }
         //res.json(addAboutUser.rows[0]);
     }
 
     async userCreate(req, res) {
-        const {
-            login,
-            password,
-            date_birth,
-            sex
-        } = req.body;
+        const {login, password, date_birth, sex} = req.body;
         const loginCheckQuery = await db.query(
-            `SELECT count(id_user) FROM kurs.users WHERE login = ($1);`, [login]);
+            `SELECT count(id_user) FROM kurs.users WHERE login = ($1);`,
+            [login]
+        );
 
         if (+loginCheckQuery.rows[0].count) {
-            res.json({
-                regStatus: 0,
-                regText: 'User alredy exist',
-            });
+            res.json({regStatus: 0, regText: 'User alredy exist'});
         } else {
             const hashPassword = bcrypt.hashSync(String(password), 7);
             const newUserQuery = await db.query(
-                `INSERT INTO kurs.users VALUES ($1, $2) RETURNING *`, [login, hashPassword]);
+                `INSERT INTO kurs.users VALUES ($1, $2) RETURNING *`,
+                [login, hashPassword]
+            );
             res.json({
-                regStatus: 1,
-                regText: 'Registered',
-                id_user: newUserQuery.rows[0].id_user
+                regStatus: 1, regText: 'Registered', id_user: newUserQuery
+                    .rows[0]
+                    .id_user
             });
-            const addAboutUser = await db.query(`
+            const addAboutUser = await db.query(
+                `
             insert into kurs.about_users (id_user, date_birth, sex, date_registr) 
-            values ($1, ($2)::timestamp at time zone 'Europe/Moscow', $3, now())`, [newUserQuery.rows[0].id_user, date_birth, sex])
+            values ($1, ($2)::timestamp at time zone 'Europe/Moscow', $3, now())`,
+                [
+                    newUserQuery
+                        .rows[0]
+                        .id_user,
+                    date_birth,
+                    sex
+                ]
+            )
         }
     }
 
     async userLogin(req, res) {
-        const {
-            login,
-            password
-        } = req.body;
-        const loginCheck = await db.query(`
-            SELECT COUNT(login) from kurs.users WHERE login = ($1);`, [login]);
+        const {login, password} = req.body;
+        const loginCheck = await db.query(
+            `
+            SELECT COUNT(login) from kurs.users WHERE login = ($1);`,
+            [login]
+        );
         if (!(+loginCheck.rows[0].count)) {
-            res.json({
-                loginStatus: 0,
-                loginMessage: 'Wrong login'
-            })
+            res.json({loginStatus: 0, loginMessage: 'Wrong login'})
         } else {
-            const passwordRequest = await db.query(`
-                SELECT id_user, password, role from kurs.users WHERE login = ($1);`, [login]);
-                
-            const validPassword  = bcrypt.compareSync(String(password), passwordRequest.rows[0].password);
-            const token = generateAccessToken(passwordRequest.rows[0].id_user, login, passwordRequest.rows[0].role)
+            const passwordRequest = await db.query(
+                `
+                SELECT id_user, password, role from kurs.users WHERE login = ($1);`,
+                [login]
+            );
+
+            const validPassword = bcrypt.compareSync(
+                String(password),
+                passwordRequest.rows[0].password
+            );
+            const token = generateAccessToken(
+                passwordRequest.rows[0].id_user,
+                login,
+                passwordRequest.rows[0].role
+            )
             if (!validPassword) {
-                res.json({
-                    loginStatus: 0,
-                    loginMessage: 'Wrong password'
-                })
+                res.json({loginStatus: 0, loginMessage: 'Wrong password'})
             } else {
                 res.json({
-                    loginStatus: 1,
-                    loginMessage: 'Login success',
-                    loginToken: token,
-                    id_user: passwordRequest.rows[0].id_user,
+                    loginStatus: 1, loginMessage: 'Login success', loginToken: token, id_user: passwordRequest
+                        .rows[0]
+                        .id_user
                 })
             }
-            const isOnline = await db.query(`
-        UPDATE kurs.users SET online = true WHERE id_user = ($1)`, [passwordRequest.rows[0].id_user]);
-        res.json(isOnline.rows[0]);
+            const isOnline = await db.query(
+                `
+        UPDATE kurs.users SET online = true WHERE id_user = ($1)`,
+                [
+                    passwordRequest
+                        .rows[0]
+                        .id_user
+                ]
+            );
+            res.json(isOnline.rows[0]);
         }
 
     }
 
     async getUsers(req, res) {
         try {
-            const users = await db.query(`
+            const users = await db.query(
+                `
             select kurs.users.id_user, login, sex, date_birth, date_registr, COALESCE(count(id_table), 0) as count_tables, ban::timestamp at time zone 'Etc/Greenwich' as ban
             from kurs.about_users, kurs.users
             left join kurs.user_tables on kurs.user_tables.id_user = kurs.users.id_user
             where kurs.users.id_user = kurs.about_users.id_user and kurs.users.id_user <> 1
             group by kurs.users.id_user, login, sex, date_birth, date_registr
-            order by kurs.users.id_user;`)
-           
+            order by kurs.users.id_user;`
+            )
+
             res.json(users)
         } catch (e) {
             console.log(e)
@@ -127,149 +147,175 @@ class UserController {
 
     async getCountUsers(req, res) {
         try {
-            const countUsers = await db.query(`select count(kurs.users.id_user) - 1 as all_users, 
+            const countUsers = await db.query(
+                `select count(kurs.users.id_user) - 1 as all_users, 
             (select count(id_user) - 1 from kurs.users where online = true) as online \n
-            from kurs.users;`)
+            from kurs.users;`
+            )
             res.json(countUsers);
-        }
-        catch(e) {
+        } catch (e) {
             console.log(e)
         }
     }
 
     async getCountMessagesFromUser(req, res) {
         try {
-            const msgFromUsers = await db.query(`select kurs.users.id_user, coalesce(count(kurs.support.id_user), 0) as count_msg
+            const msgFromUsers = await db.query(
+                `select kurs.users.id_user, coalesce(count(kurs.support.id_user), 0) as count_msg
             from kurs.users
             left join kurs.support on kurs.support.id_user = kurs.users.id_user and type_msg = 1 and read_msg = false
             where kurs.users.id_user <> 1
 			group by kurs.users.id_user
-			order by kurs.users.id_user`);
+			order by kurs.users.id_user`
+            );
             res.json(msgFromUsers);
-        }
-
-        catch(e) {
+        } catch (e) {
             console.log(e)
         }
     }
 
     async getDialog(req, res) {
-        const {
-            id_user
-        } = req.params;
+        const {id_user} = req.params;
         if (Number(id_user)) {
-        
-            const dialogData = await db.query(`
+
+            const dialogData = await db.query(
+                `
             select date_sent::timestamp at time zone 'Etc/Greenwich' as date_sent, message, type_msg from kurs.support where id_user = ($1)
-            order by id;`, [id_user]);
+            order by id;`,
+                [id_user]
+            );
 
             res.json(dialogData);
         } else {
-            const tokenId = jwt.decode(id_user).id_user;
-           
-            const dialogData = await db.query(`
+            const tokenId = jwt
+                .decode(id_user)
+                .id_user;
+
+            const dialogData = await db.query(
+                `
             select date_sent::timestamp at time zone 'Etc/Greenwich' as date_sent, message, type_msg from kurs.support where id_user = ($1)
-            order by id;`, [tokenId]);
- 
+            order by id;`,
+                [tokenId]
+            );
+
             res.json(dialogData);
         }
 
     }
 
     async readMsg(req, res) {
-        const {
-            id_user
-        } = req.body;
+        const {id_user} = req.body;
         if (Number(id_user)) {
-            const readDialog = await db.query(`
-             update kurs.support set read_msg = true where id_user = ($1) and type_msg = 1;`, [id_user]);
-             
+            const readDialog = await db.query(
+                `
+             update kurs.support set read_msg = true where id_user = ($1) and type_msg = 1;`,
+                [id_user]
+            );
+
             res.json(readDialog.rows[0]);
         } else {
-            const tokenId = jwt.decode(id_user).id_user;
-            const readDialog = await db.query(`
-            update kurs.support set read_msg = true where id_user = ($1) and type_msg = 0;`, [tokenId]);
+            const tokenId = jwt
+                .decode(id_user)
+                .id_user;
+            const readDialog = await db.query(
+                `
+            update kurs.support set read_msg = true where id_user = ($1) and type_msg = 0;`,
+                [tokenId]
+            );
             res.json(readDialog.rows[0]);
         }
     }
 
     async checkBanTime(req, res) {
-        const checkBan = await db.query(`update kurs.users set ban = case when ban > now() then ban else null end;`);
+        const checkBan = await db.query(
+            `update kurs.users set ban = case when ban > now() then ban else null end;`
+        );
         res.json(checkBan.rows[0]);
 
     }
 
     async getAboutUser(req, res) {
-        const { id_user } = req.params;
-        const aboutUser = await db.query(`
+        const {id_user} = req.params;
+        const aboutUser = await db.query(
+            `
         select date_birth::timestamp at time zone 'Etc/Greenwich' as date_birth, sex, login, extract('day' from date_trunc('day',now() - date_registr)) as all_days,
         ban::timestamp at time zone 'Etc/Greenwich' as ban 
         from kurs.about_users, kurs.users where kurs.about_users.id_user = ($1) 
         and kurs.about_users.id_user = kurs.users.id_user 
-        group by date_birth, sex, login, date_registr, ban;`, [id_user]);
+        group by date_birth, sex, login, date_registr, ban;`,
+            [id_user]
+        );
         res.json(aboutUser.rows[0])
     }
 
     async bannedUser(req, res) {
-        const { time_ban, id_user } = req.body;
+        const {time_ban, id_user} = req.body;
         try {
-        const banUserQuery = await db.query(`update kurs.users set ban = (now() + interval '${time_ban} hour') where id_user = ($1) returning *;`, [id_user]);
-        res.json(banUserQuery.rows[0]);
-    } catch(error) {
-        res.json({
-          code: error.code,
-          message: error.message
-        })
-      }
-      }
+            const banUserQuery = await db.query(
+                `update kurs.users set ban = (now() + interval '${time_ban} hour') where id_user = ($1) returning *;`,
+                [id_user]
+            );
+            res.json(banUserQuery.rows[0]);
+        } catch (error) {
+            res.json({code: error.code, message: error.message})
+        }
+    }
 
     async deleteUser(req, res) {
-        const { id_user } = req.params;
-        const deleteUserQuery = await db.query(`
-        delete from kurs.users where id_user = ($1)`, [id_user]);
+        const {id_user} = req.params;
+        const deleteUserQuery = await db.query(
+            `
+        delete from kurs.users where id_user = ($1)`,
+            [id_user]
+        );
         res.json(deleteUserQuery.rows[0]);
     }
 
     async userChangePassword(req, res) {
-        const {
-            new_password,
-            id_user
-        } = req.body;
+        const {new_password, id_user} = req.body;
         const setNewPassQuery = await db.query(
-            `UPDATE kurs.users SET password = ($1) WHERE id_user = ($2)`, [new_password, id_user]);
+            `UPDATE kurs.users SET password = ($1) WHERE id_user = ($2)`,
+            [new_password, id_user]
+        );
         res.json(setNewPassQuery.rows[0]);
     }
 
     async userLogout(req, res) {
-        const {
-            id_user
-        } = req.body;
+        const {id_user} = req.body;
         const setOnline = await db.query(
-            `UPDATE kurs.users SET online = false WHERE id_user = ($1)`, [id_user]);
-            
+            `UPDATE kurs.users SET online = false WHERE id_user = ($1)`,
+            [id_user]
+        );
+
         res.json(setOnline.rows[0]);
     }
 
     async insertMsg(req, res) {
         try {
-          const { id_user, message } = req.body;
-          if (Number(id_user)) {
-            const newMsg = await db.query(`
-          insert into kurs.support (id_user, date_sent, message, type_msg) values ($1, now(), $2, 0)`, [id_user, message]);
-          res.json(newMsg.rows)
-        } else {
-            const tokenId = jwt.decode(id_user).id_user;
-            const newMsg = await db.query(`
-          insert into kurs.support (id_user, date_sent, message, type_msg) values ($1, now(), $2, 1)`, [tokenId, message]);
-          res.json(newMsg.rows)
+            const {id_user, message} = req.body;
+            if (Number(id_user)) {
+                const newMsg = await db.query(
+                    `
+          insert into kurs.support (id_user, date_sent, message, type_msg) values ($1, now(), $2, 0)`,
+                    [id_user, message]
+                );
+                res.json(newMsg.rows)
+            } else {
+                const tokenId = jwt
+                    .decode(id_user)
+                    .id_user;
+                const newMsg = await db.query(
+                    `
+          insert into kurs.support (id_user, date_sent, message, type_msg) values ($1, now(), $2, 1)`,
+                    [tokenId, message]
+                );
+                res.json(newMsg.rows)
+            }
+        } catch (error) {
+            res.json({errorMessage: error.message})
         }
-        } catch(error) {
-          res.json({
-            errorMessage: error.message,
-          })
-        }
-    
-      }
+
+    }
 
 }
 
