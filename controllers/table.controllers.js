@@ -142,6 +142,28 @@ class TableController {
     res.json(sortByAlphabetQuery.rows)
   }
 
+  async sortByDone(req, res) {
+    const { id_sticker } = req.params
+    const sortByAlphabetQuery = await db.query(`
+    select kurs.stickers.id_sticker, kurs.records.id_record, record, done, date_create  \n
+    from kurs.stickers, kurs.records \n
+    where kurs.stickers.id_sticker = kurs.records.id_sticker \n
+    and kurs.stickers.id_sticker = ($1) \n
+    order by done desc`, [id_sticker]);
+    res.json(sortByAlphabetQuery.rows)
+  }
+
+  async sortByNotDone(req, res) {
+    const { id_sticker } = req.params
+    const sortByAlphabetQuery = await db.query(`
+    select kurs.stickers.id_sticker, kurs.records.id_record, record, done, date_create  \n
+    from kurs.stickers, kurs.records \n
+    where kurs.stickers.id_sticker = kurs.records.id_sticker \n
+    and kurs.stickers.id_sticker = ($1) \n
+    order by done asc`, [id_sticker]);
+    res.json(sortByAlphabetQuery.rows)
+  }
+
   async isDone(req, res) {
     const { id_record } = req.body;
     const isDoneQuery = await db.query(`

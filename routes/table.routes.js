@@ -7,6 +7,8 @@ router.get('/table/sticker/:id_sticker', authMiddleware, TableController.getStic
 router.get('/table/sort/alphabet/:id_sticker', authMiddleware, TableController.sortByAlphabet);
 router.get('/table/sort/old/:id_sticker', authMiddleware, TableController.sortByOld);
 router.get('/table/sort/new/:id_sticker', authMiddleware, TableController.sortByNew);
+router.get('/table/sort/done/:id_sticker', authMiddleware, TableController.sortByDone);
+router.get('/table/sort/not_done/:id_sticker', authMiddleware, TableController.sortByNotDone);
 router.get('/table/history/:id_table', authMiddleware, TableController.getHistoryTable);
 router.get('/table/:id_table', authMiddleware, TableController.getTable);
 router.get('/table/bg/:id_table', authMiddleware, TableController.getBgTable);
