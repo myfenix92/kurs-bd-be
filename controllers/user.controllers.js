@@ -21,7 +21,7 @@ class UserController {
         if (req.body.password !== '' && req.body.date_birth !== '' && req.body.sex !== '') {
             addAboutUser = await db.query(
                 `
-            update kurs.about_users set date_birth = ($1)::timestamp at time zone 'Europe/Moscow', 
+            update kurs.about_users set date_birth = ($1), 
             sex = ($2)
             where id_user = ($3);`,
                 [date_birth, sex, id_user]
@@ -35,7 +35,7 @@ class UserController {
         } else if (req.body.password === '' && req.body.date_birth !== '' && req.body.sex !== '') {
             addAboutUser = await db.query(
                 `
-            update kurs.about_users set date_birth = ($1)::timestamp at time zone 'Europe/Moscow', 
+            update kurs.about_users set date_birth = ($1), 
             sex = ($2)
             where id_user = ($3)`,
                 [date_birth, sex, id_user]
@@ -67,7 +67,7 @@ class UserController {
             const addAboutUser = await db.query(
                 `
             insert into kurs.about_users (id_user, date_birth, sex, date_registr) 
-            values ($1, ($2)::timestamp at time zone 'Europe/Moscow', $3, now())`,
+            values ($1, ($2), $3, now())`,
                 [
                     newUserQuery
                         .rows[0]
@@ -131,7 +131,7 @@ class UserController {
         try {
             const users = await db.query(
                 `
-            select kurs.users.id_user, login, sex, date_birth, date_registr, COALESCE(count(id_table), 0) as count_tables, ban::timestamp at time zone 'Etc/Greenwich' as ban
+            select kurs.users.id_user, login, sex, date_birth, date_registr, COALESCE(count(id_table), 0) as count_tables, ban
             from kurs.about_users, kurs.users
             left join kurs.user_tables on kurs.user_tables.id_user = kurs.users.id_user
             where kurs.users.id_user = kurs.about_users.id_user and kurs.users.id_user <> 1
@@ -180,7 +180,7 @@ class UserController {
 
             const dialogData = await db.query(
                 `
-            select date_sent::timestamp at time zone 'Etc/Greenwich' as date_sent, message, type_msg from kurs.support where id_user = ($1)
+            select date_sent, message, type_msg from kurs.support where id_user = ($1)
             order by id;`,
                 [id_user]
             );
@@ -193,7 +193,7 @@ class UserController {
 
             const dialogData = await db.query(
                 `
-            select date_sent::timestamp at time zone 'Etc/Greenwich' as date_sent, message, type_msg from kurs.support where id_user = ($1)
+            select date_sent, message, type_msg from kurs.support where id_user = ($1)
             order by id;`,
                 [tokenId]
             );
@@ -238,8 +238,7 @@ class UserController {
         const {id_user} = req.params;
         const aboutUser = await db.query(
             `
-        select date_birth::timestamp at time zone 'Etc/Greenwich' as date_birth, sex, login, extract('day' from date_trunc('day',now() - date_registr)) as all_days,
-        ban::timestamp at time zone 'Etc/Greenwich' as ban 
+        select date_birth, sex, login, extract('day' from date_trunc('day',now() - date_registr)) as all_days, ban 
         from kurs.about_users, kurs.users where kurs.about_users.id_user = ($1) 
         and kurs.about_users.id_user = kurs.users.id_user 
         group by date_birth, sex, login, date_registr, ban;`,

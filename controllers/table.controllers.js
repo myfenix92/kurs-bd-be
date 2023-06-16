@@ -174,7 +174,7 @@ class TableController {
   async getHistoryTable(req, res) {
     const { id_table } = req.params;
     const historyChangesQuery = await db.query(`
-    select id_table, id_sticker, id_record, changes, old_value, time_change, date_change::timestamp at time zone 'Etc/Greenwich' as date_change, \n
+    select id_table, id_sticker, id_record, changes, old_value, time_change, date_change, \n
     new_tbl, new_stc, new_rec \n
     from kurs.history_changes \n
     where id_table = ($1) or id_sticker in \n
